@@ -1,3 +1,5 @@
+#pragma once
+
 #include "IOperation.h"
 
 class Plus : public IOperation
