@@ -14,6 +14,10 @@ public:
         return 2;
     }
     
+    int getPriority() const override {
+        return 1;
+    }
+
     float execute(const std::vector<float>& args) override {
         if (args.size() != getArgumentCount()) {
             // throw std::invalid_argument("Plus requires exactly 2 argument");

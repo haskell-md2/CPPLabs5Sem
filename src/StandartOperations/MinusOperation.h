@@ -13,6 +13,10 @@ public:
     size_t getArgumentCount() const override {
         return 2;
     }
+
+    int getPriority() const override {
+        return 1;
+    }
     
     float execute(const std::vector<float>& args) override {
         if (args.size() != getArgumentCount()) {
