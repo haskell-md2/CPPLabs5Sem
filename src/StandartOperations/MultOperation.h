@@ -1,6 +1,6 @@
 #pragma once
 
-#include "IOperation.h"
+#include "../Interfaces/IOperation.h"
 
 class Mult : public IOperation
 {
