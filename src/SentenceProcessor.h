@@ -1,30 +1,40 @@
 #pragma once
 
-#include <iostream> //to del
-
 #include <string>
 #include <vector>
+#include <memory>
+#include <unordered_map>
 
-using namespace std;
+#include "StandartOperations/PlusOperation.h"
+#include "StandartOperations/MinusOperation.h"
+#include "StandartOperations/MultOperation.h"
+#include "StandartOperations/DivOperation.h"
+#include "StandartOperations/UnarMinusOperation.h"
 
-class SentenceProcessor{
+#include <cmath>
+#include <filesystem>
+#include <iostream>
 
-    private:
-        vector<string> _postfix;
-        
-        vector<string> _getPostfix(string input);
 
-        vector<string> _split(string input);
+class SentenceProcessor {
+private:
+    std::vector<std::string> _postfix;
+    std::unordered_map<std::string, std::unique_ptr<IOperation>> operations;
+    
+    std::vector<std::string> _getPostfix(std::string input);
+    std::vector<std::string> _split(std::string input);
+    
+    bool isDig(char c);
+    bool isFunction(const std::string& token);
+    int priority(const std::string& s);
+    
+    void registerBuiltinOperations();
+    void loadPlugins();
 
-        bool isDig(char c);
-        bool isOperation(char c);
-
-        int priority(char s);
-
-    public:
-        
-        SentenceProcessor();
-
-        float calculate(string input);
+public:
+    SentenceProcessor();
+    ~SentenceProcessor() = default;
+    
+    void registerOperation(std::unique_ptr<IOperation> operation);
+    float calculate(std::string input);
 };
-
