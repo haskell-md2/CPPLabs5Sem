@@ -19,9 +19,7 @@ public:
     }
 
     float execute(const std::vector<float>& args) override {
-        if (args.size() != getArgumentCount()) {
-            // throw std::invalid_argument("Plus requires exactly 2 argument");
-        }
+
         return args[0] * args[1];
     }
     
