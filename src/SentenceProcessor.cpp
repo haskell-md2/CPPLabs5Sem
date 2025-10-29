@@ -139,7 +139,8 @@ std::vector<std::string> SentenceProcessor::_getPostfix(std::string input) {
             }
         }
         else {
-            //throw 
+
+            throw std::invalid_argument("Чуждый калькулятору символ : " + s);
         }
     }
     
