@@ -16,6 +16,9 @@ void SentenceProcessor::registerBuiltinOperations() {
 
 void SentenceProcessor::registerOperation(std::unique_ptr<IOperation> operation) {
     std::string name = operation->getName();
+    if(operation->getArgumentCount() == 1){
+        name += "_unar";
+    }
     operations[name] = std::move(operation);
 }
 
@@ -93,6 +96,7 @@ int SentenceProcessor::priority(const std::string& s) {
     return 0; 
 }
 
+
 std::vector<std::string> SentenceProcessor::_getPostfix(std::string input) {
     std::vector<std::string> stack;
     std::vector<std::string> result;
@@ -169,7 +173,21 @@ float SentenceProcessor::calculate(std::string input) {
                 size_t argCount = operation->getArgumentCount();
                 
                 if (nums.size() < argCount) {
-                    throw std::invalid_argument("Недостаточно операндов: " + s);
+                    
+                    if(nums.size() == 1){
+                        std::string new_name = s + "_unar";
+                        auto new_it = operations.find(new_name);
+                        if(new_it != operations.end()){
+                            std::cout << "ok" << std::endl;
+                            argCount = 1;
+                            operation = new_it->second.get();
+                        }
+                        else{
+                            throw std::invalid_argument("Нет такой унарной операции: " + s);
+                        }
+                    }else{
+                        throw std::invalid_argument("Недостаточно операндов: " + s);
+                    }
                 }
                 
                 std::vector<float> args;
