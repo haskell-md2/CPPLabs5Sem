@@ -6,7 +6,7 @@ SRC_DIR := ./src
 BUILD_DIR := ./build
 OBJ_DIR := $(BUILD_DIR)/obj
 PLUGINS_DIR := $(BUILD_DIR)/plugins
-TARGET := $(BUILD_DIR)/calculator
+TARGET := $(BUILD_DIR)/calс
 
 SRCS := $(shell find $(SRC_DIR) -name "*.cpp" | grep -v "/plugins/")
 OBJS := $(SRCS:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o)
