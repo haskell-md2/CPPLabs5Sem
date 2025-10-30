@@ -11,8 +11,12 @@ else()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
 endif()
 
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/plugins)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+
 set(SRC_DIR src)
-set(BUILD_DIR ${CMAKE_BINARY_DIR})
 set(PLUGINS_DIR plugins)
 
 file(GLOB_RECURSE MAIN_SRCS 
@@ -28,28 +32,30 @@ file(GLOB_RECURSE PLUGIN_SRCS
 add_executable(calculator ${MAIN_SRCS})
 
 set_target_properties(calculator PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY ${BUILD_DIR}
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
 )
 
 foreach(plugin_src ${PLUGIN_SRCS})
-
     get_filename_component(plugin_name ${plugin_src} NAME_WE)
     
     if(WIN32)
-        set(plugin_output ${plugin_name}.dll)
-        set(plugin_type SHARED)
+        set(plugin_type MODULE)
     else()
-        set(plugin_output ${plugin_name}.so)
         set(plugin_type MODULE)
     endif()
     
     add_library(${plugin_name} ${plugin_type} ${plugin_src})
     
     set_target_properties(${plugin_name} PROPERTIES
-        LIBRARY_OUTPUT_DIRECTORY ${BUILD_DIR}/${PLUGINS_DIR}
-        RUNTIME_OUTPUT_DIRECTORY ${BUILD_DIR}/${PLUGINS_DIR}
+        LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/plugins
+        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/plugins
         OUTPUT_NAME ${plugin_name}
         PREFIX ""
+    )
+    
+    target_include_directories(${plugin_name} PRIVATE 
+        ${CMAKE_SOURCE_DIR}/src
+        ${CMAKE_SOURCE_DIR}/src/Interfaces
     )
     
     if(UNIX AND NOT APPLE)
@@ -66,19 +72,26 @@ endforeach()
 add_custom_target(plugins ALL DEPENDS ${ALL_PLUGINS})
 
 add_custom_target(run
-    COMMAND ${BUILD_DIR}/calculator
+    COMMAND ${CMAKE_BINARY_DIR}/bin/calculator
     DEPENDS calculator ${ALL_PLUGINS}
-    WORKING_DIRECTORY ${BUILD_DIR}
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/bin
     COMMENT "Запуск приложения calculator"
 )
 
 add_custom_target(rebuild
-    COMMAND ${CMAKE_COMMAND} --build ${BUILD_DIR} --target clean
-    COMMAND ${CMAKE_COMMAND} --build ${BUILD_DIR}
+    COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target clean
+    COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR}
     COMMENT "Очистка и пересборка проекта"
 )
 
 add_custom_target(build_all DEPENDS calculator plugins)
+
+add_custom_target(prepare_distribution ALL
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_BINARY_DIR}/bin/plugins
+        ${CMAKE_BINARY_DIR}/plugins
+    COMMENT "Подготовка дистрибутива"
+)
 
 message(STATUS "Основные исходные файлы: ${MAIN_SRCS}")
 message(STATUS "Файлы плагинов: ${PLUGIN_SRCS}")
