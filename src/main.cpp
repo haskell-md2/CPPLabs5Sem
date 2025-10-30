@@ -7,6 +7,8 @@ using namespace std;
 
 int main() {
     
+    
+
     if (std::setlocale(LC_ALL, "ru_RU.UTF-8") == nullptr &&
         std::setlocale(LC_ALL, "ru_RU.utf8") == nullptr &&
         std::setlocale(LC_ALL, "Russian_Russia.1251") == nullptr &&
@@ -14,6 +16,8 @@ int main() {
         std::cout << "Failed to set Russian locale. Enjoy the abracadabra! AZAZA!!1!" << std::endl;
     }
 
+    std::setlocale(LC_NUMERIC, "C");
+    
     string s;
     
 
