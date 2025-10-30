@@ -23,7 +23,8 @@ std::vector<std::unique_ptr<IOperation>> PluginManager::loadOperations() {
     
     try {
         if (!std::filesystem::exists(pluginsDir)) {
-            std::cout << "Директория плагинов не найдена: " << pluginsDir << std::endl;
+            std::cout << "Директория плагинов не найдена, исправляемся...: " << pluginsDir << std::endl;
+            std::filesystem::create_directory(pluginsDir);
             return operations;
         }
         
