@@ -23,20 +23,11 @@ void SentenceProcessor::registerOperation(std::unique_ptr<IOperation> operation)
 }
 
 void SentenceProcessor::loadPlugins() {
-    std::string pluginsDir = "./plugins";
-    
-    try {
-        if (!std::filesystem::exists(pluginsDir)) {
-            return;
+    auto pluginOperations = pluginManager.loadOperations();
+    for (auto& operation : pluginOperations) {
+        if (operation) {
+            registerOperation(std::move(operation));
         }
-        
-        for (const auto& entry : std::filesystem::directory_iterator(pluginsDir)) {
-            if (entry.path().extension() == ".dll") {
-                //load Dll
-            }
-        }
-    } catch (const std::exception& e) {
-        std::cout << "Не удалось загрузить плагины: " << e.what() << std::endl;
     }
 }
 
@@ -159,6 +150,7 @@ std::vector<std::string> SentenceProcessor::_getPostfix(std::string input) {
 }
 
 float SentenceProcessor::calculate(std::string input) {
+
     std::vector<float> nums;
 
     for (const std::string& s : _getPostfix(input)) {
@@ -178,7 +170,6 @@ float SentenceProcessor::calculate(std::string input) {
                         std::string new_name = s + "_unar";
                         auto new_it = operations.find(new_name);
                         if(new_it != operations.end()){
-                            std::cout << "ok" << std::endl;
                             argCount = 1;
                             operation = new_it->second.get();
                         }

@@ -15,9 +15,14 @@
 #include <filesystem>
 #include <iostream>
 
+#include "PluginManager.h"
+
 
 class SentenceProcessor {
 private:
+
+    PluginManager pluginManager;
+    
     std::vector<std::string> _postfix;
     std::unordered_map<std::string, std::unique_ptr<IOperation>> operations;
     
