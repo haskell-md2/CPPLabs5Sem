@@ -31,6 +31,13 @@ private:
     void closeAllPlugins();
 
 public:
+
+    PluginManager(const PluginManager&) = delete;
+    PluginManager& operator=(const PluginManager&) = delete;
+    
+    PluginManager(PluginManager&& other);
+    PluginManager& operator=(PluginManager&& other) ;
+
     PluginManager();
     explicit PluginManager(const std::string& pluginsDirectory);
     ~PluginManager();
