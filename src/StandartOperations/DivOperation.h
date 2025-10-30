@@ -2,6 +2,8 @@
 
 #include "../Interfaces/IOperation.h"
 
+#include <stdexcept>
+
 class Div : public IOperation
 {
 
@@ -20,6 +22,9 @@ public:
 
     float execute(const std::vector<float>& args) override {
 
+        if(args[1] == 0){
+            throw std::invalid_argument("Деление на ноль! Предельные переходы мы не разрешали!");
+        }
         return args[0] / args[1];
     }
     
