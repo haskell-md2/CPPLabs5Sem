@@ -90,12 +90,16 @@ std::vector<std::string> SentenceProcessor::_getPostfix(std::string input) {
     std::vector<std::string> result;
     std::vector<std::string> tokens = _split(input);
     
+    
     for (size_t i = 0; i < tokens.size(); i++) {
         const std::string& s = tokens[i];
         char first_c = s.at(0);
         
-        if (isDig(first_c) || (s.length() > 1 && isalpha(first_c))) {
+        if (isDig(first_c)) {
             result.push_back(s);
+        }
+        else if (isalpha(first_c)) {
+            stack.push_back(s);
         }
         else if (first_c == '(') {
             stack.push_back(s);
@@ -106,6 +110,10 @@ std::vector<std::string> SentenceProcessor::_getPostfix(std::string input) {
                 stack.pop_back();
             }
             if (!stack.empty() && stack.back() == "(") {
+                stack.pop_back();
+            }
+            if (!stack.empty() && isFunction(stack.back())) {
+                result.push_back(stack.back());
                 stack.pop_back();
             }
         }
@@ -131,27 +139,14 @@ std::vector<std::string> SentenceProcessor::_getPostfix(std::string input) {
                 stack.push_back(s);
             }
         }
-        else if (isFunction(s)) {
-            if (stack.empty()) {
-                stack.push_back(s);
+        else if (operations.find(s) != operations.end()) {
+
+            while (!stack.empty() && stack.back() != "(" && 
+                   priority(stack.back()) >= priority(s)) {
+                result.push_back(stack.back());
+                stack.pop_back();
             }
-            else {
-                std::string prev_in_stack = stack.back();
-                int new_priority = priority(s);
-                int prev_priority = priority(prev_in_stack);
-                
-                while (!stack.empty() && stack.back() != "(" && 
-                      prev_priority >= new_priority) {
-                    result.push_back(stack.back());
-                    stack.pop_back();
-                    
-                    if (!stack.empty()) {
-                        prev_in_stack = stack.back();
-                        prev_priority = priority(prev_in_stack);
-                    }
-                }
-                stack.push_back(s);
-            }
+            stack.push_back(s);
         }
         else {
             throw std::invalid_argument("Чуждый калькулятору символ : " + s);
@@ -165,12 +160,15 @@ std::vector<std::string> SentenceProcessor::_getPostfix(std::string input) {
         stack.pop_back();
     }
 
+
     return result;
 }
 
 float SentenceProcessor::calculate(std::string input) {
 
     std::vector<float> nums;
+
+    std::vector<std::string> postfix = _getPostfix(input);
 
     for (const std::string& s : _getPostfix(input)) {
 
