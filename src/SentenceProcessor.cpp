@@ -16,9 +16,6 @@ void SentenceProcessor::registerBuiltinOperations() {
 
 void SentenceProcessor::registerOperation(std::unique_ptr<IOperation> operation) {
     std::string name = operation->getName();
-    if(operation->getArgumentCount() == 1){
-        name += "_unar";
-    }
     operations[name] = std::move(operation);
 }
 
@@ -93,7 +90,8 @@ std::vector<std::string> SentenceProcessor::_getPostfix(std::string input) {
     std::vector<std::string> result;
     std::vector<std::string> tokens = _split(input);
     
-    for (const std::string& s : tokens) {
+    for (size_t i = 0; i < tokens.size(); i++) {
+        const std::string& s = tokens[i];
         char first_c = s.at(0);
         
         if (isDig(first_c) || (s.length() > 1 && isalpha(first_c))) {
@@ -109,6 +107,28 @@ std::vector<std::string> SentenceProcessor::_getPostfix(std::string input) {
             }
             if (!stack.empty() && stack.back() == "(") {
                 stack.pop_back();
+            }
+        }
+        else if (s == "-") {
+            bool isUnary = (i == 0) || 
+                          (i > 0 && (tokens[i-1] == "(" || 
+                           operations.find(tokens[i-1]) != operations.end()));
+            
+            if (isUnary) {
+                std::string unarMinus = "-_unar";
+                while (!stack.empty() && stack.back() != "(" && 
+                       priority(stack.back()) >= priority(unarMinus)) {
+                    result.push_back(stack.back());
+                    stack.pop_back();
+                }
+                stack.push_back(unarMinus);
+            } else {
+                while (!stack.empty() && stack.back() != "(" && 
+                       priority(stack.back()) >= priority(s)) {
+                    result.push_back(stack.back());
+                    stack.pop_back();
+                }
+                stack.push_back(s);
             }
         }
         else if (isFunction(s)) {
@@ -134,7 +154,6 @@ std::vector<std::string> SentenceProcessor::_getPostfix(std::string input) {
             }
         }
         else {
-
             throw std::invalid_argument("Чуждый калькулятору символ : " + s);
         }
     }
@@ -154,6 +173,8 @@ float SentenceProcessor::calculate(std::string input) {
     std::vector<float> nums;
 
     for (const std::string& s : _getPostfix(input)) {
+
+
         if (isDig(s.at(0))) {
             nums.push_back(std::stof(s));
         }
@@ -164,21 +185,11 @@ float SentenceProcessor::calculate(std::string input) {
                 IOperation* operation = it->second.get();
                 size_t argCount = operation->getArgumentCount();
                 
+
                 if (nums.size() < argCount) {
                     
-                    if(nums.size() == 1){
-                        std::string new_name = s + "_unar";
-                        auto new_it = operations.find(new_name);
-                        if(new_it != operations.end()){
-                            argCount = 1;
-                            operation = new_it->second.get();
-                        }
-                        else{
-                            throw std::invalid_argument("Нет такой унарной операции: " + s);
-                        }
-                    }else{
-                        throw std::invalid_argument("Недостаточно операндов: " + s);
-                    }
+                    throw std::invalid_argument("Недостаточно операндов: " + s);
+
                 }
                 
                 std::vector<float> args;

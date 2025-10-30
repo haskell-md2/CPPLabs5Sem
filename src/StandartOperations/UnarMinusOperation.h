@@ -7,7 +7,7 @@ class UnarMinus : public IOperation
 
 public:
     std::string getName() const override {
-        return "-";
+        return "-_unar";
     }
     
     size_t getArgumentCount() const override {
