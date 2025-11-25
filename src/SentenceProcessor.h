@@ -20,7 +20,7 @@ private:
     PluginManager pluginManager;
 
     std::vector<std::string> _postfix;
-    std::unordered_map<std::string, std::unique_ptr<IOperation>> operations;
+    std::unordered_map<std::string, std::shared_ptr<IOperation>> operations;
     
     std::vector<std::string> _getPostfix(std::string input);
     std::vector<std::string> _split(std::string input);
@@ -36,6 +36,6 @@ public:
     SentenceProcessor();
     ~SentenceProcessor() = default;
     
-    void registerOperation(std::unique_ptr<IOperation> operation);
+    void registerOperation(std::shared_ptr<IOperation> operation);
     float calculate(std::string input);
 };

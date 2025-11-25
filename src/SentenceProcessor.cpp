@@ -14,7 +14,7 @@ void SentenceProcessor::registerBuiltinOperations() {
     registerOperation(std::make_unique<UnarMinus>());
 }
 
-void SentenceProcessor::registerOperation(std::unique_ptr<IOperation> operation) {
+void SentenceProcessor::registerOperation(std::shared_ptr<IOperation> operation) {
     std::string name = operation->getName();
     operations[name] = std::move(operation);
 }
