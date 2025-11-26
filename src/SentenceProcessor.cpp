@@ -4,6 +4,7 @@
 SentenceProcessor::SentenceProcessor() {
     registerBuiltinOperations();
     loadPlugins();
+    _rdp = RawDataProcessor(operations);
 }
 
 void SentenceProcessor::registerBuiltinOperations() {
@@ -28,52 +29,7 @@ void SentenceProcessor::loadPlugins() {
     }
 }
 
-std::vector<std::string> SentenceProcessor::_split(std::string input) {
-    std::vector<std::string> result;
-    std::string current;
-    
-    for (size_t i = 0; i < input.length(); i++) {
-        char c = input[i];
 
-        if (c == ' ') continue;
-        
-        if (isdigit(c) || c == '.') {
-            current += c;
-            if (i + 1 == input.length() || (!isdigit(input[i + 1]) && input[i + 1] != '.')) {
-                result.push_back(current);
-                current.clear();
-            }
-        }
-        else if (isalpha(c)) {
-            current += c;
-            if (i + 1 == input.length() || !isalpha(input[i + 1])) {
-                result.push_back(current);
-                current.clear();
-            }
-        }
-        else {
-            if (!current.empty()) {
-                result.push_back(current);
-                current.clear();
-            }
-            result.push_back(std::string(1, c));
-        }
-    }
-    
-    if (!current.empty()) {
-        result.push_back(current);
-    }
-    
-    return result;
-}
-
-bool SentenceProcessor::isDig(char c) {
-    return isdigit(c) || c == '.';
-}
-
-bool SentenceProcessor::isFunction(const std::string& token) {
-    return operations.find(token) != operations.end();
-}
 
 int SentenceProcessor::priority(const std::string& s) {
 
@@ -86,13 +42,13 @@ int SentenceProcessor::priority(const std::string& s) {
 
 
 std::vector<std::string> SentenceProcessor::_getPostfix(std::string input) {
-    std::vector<std::string> tokens = _split(input);
+    std::vector<std::string> tokens = _rdp.split(input);
     std::vector<std::string> output;
     std::stack<std::string> operators;
 
     for (const auto& token : tokens) {
         try {
-            if (isDig(token[0])) {
+            if (_rdp.isDig(token[0])) {
 
                 size_t pos;
                 std::stof(token, &pos);
@@ -120,7 +76,7 @@ std::vector<std::string> SentenceProcessor::_getPostfix(std::string input) {
                     throw std::invalid_argument("Беда со скобками");
                 }
             } 
-            else if (isFunction(token)) {
+            else if (_rdp.isFunction(token)) {
                 while (!operators.empty() && operators.top() != "(" 
                        && priority(operators.top()) >= priority(token)) {
                     output.push_back(operators.top());
@@ -155,11 +111,11 @@ float SentenceProcessor::calculate(std::string input) {
     try {
         for (const std::string& token : postfix) {
             try {
-                if (isDig(token[0])) {
+                if (_rdp.isDig(token[0])) {
 
                     values.push(std::stof(token));
                 } 
-                else if (isFunction(token)) {
+                else if (_rdp.isFunction(token)) {
 
                     auto it = operations.find(token);
                     if (it == operations.end()) {

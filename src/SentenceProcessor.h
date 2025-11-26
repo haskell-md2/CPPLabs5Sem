@@ -19,6 +19,7 @@
 
 #include "PluginManager.h"
 
+#include "RawDataProcessor.h"
 
 class SentenceProcessor {
 private:
@@ -29,10 +30,9 @@ private:
     std::unordered_map<std::string, std::shared_ptr<IOperation>> operations;
     
     std::vector<std::string> _getPostfix(std::string input);
-    std::vector<std::string> _split(std::string input);
-    
-    bool isDig(char c);
-    bool isFunction(const std::string& token);
+
+    RawDataProcessor _rdp;
+
     int priority(const std::string& s);
     
     void registerBuiltinOperations();
