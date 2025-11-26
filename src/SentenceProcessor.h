@@ -5,8 +5,6 @@
 #include <memory>
 #include <unordered_map>
 #include <cmath>
-#include <stack>
-#include <cctype>
 #include <stdexcept>
 #include <algorithm>
 
@@ -20,6 +18,7 @@
 #include "PluginManager.h"
 
 #include "RawDataProcessor.h"
+#include "Tokenezator.h"
 
 class SentenceProcessor {
 private:
@@ -29,9 +28,9 @@ private:
     std::vector<std::string> _postfix;
     std::unordered_map<std::string, std::shared_ptr<IOperation>> operations;
     
-    std::vector<std::string> _getPostfix(std::string input);
 
     RawDataProcessor _rdp;
+    Tokenezator _tr;
 
     int priority(const std::string& s);
     
