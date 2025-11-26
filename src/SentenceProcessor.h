@@ -4,6 +4,12 @@
 #include <vector>
 #include <memory>
 #include <unordered_map>
+#include <cmath>
+#include <stack>
+#include <cctype>
+#include <stdexcept>
+#include <algorithm>
+
 
 #include "StandartOperations/PlusOperation.h"
 #include "StandartOperations/MinusOperation.h"

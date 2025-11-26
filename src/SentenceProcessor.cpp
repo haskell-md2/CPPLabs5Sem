@@ -86,128 +86,127 @@ int SentenceProcessor::priority(const std::string& s) {
 
 
 std::vector<std::string> SentenceProcessor::_getPostfix(std::string input) {
-    std::vector<std::string> stack;
-    std::vector<std::string> result;
     std::vector<std::string> tokens = _split(input);
-    
-    
-    for (size_t i = 0; i < tokens.size(); i++) {
-        const std::string& s = tokens[i];
-        char first_c = s.at(0);
-        
-        if (isDig(first_c)) {
-            result.push_back(s);
-        }
-        else if (isalpha(first_c)) {
-            stack.push_back(s);
-        }
-        else if (first_c == '(') {
-            stack.push_back(s);
-        }
-        else if (first_c == ')') {
-            while (!stack.empty() && stack.back() != "(") {
-                result.push_back(stack.back());
-                stack.pop_back();
-            }
-            if (!stack.empty() && stack.back() == "(") {
-                stack.pop_back();
-            }
-            if (!stack.empty() && isFunction(stack.back())) {
-                result.push_back(stack.back());
-                stack.pop_back();
-            }
-        }
-        else if (s == "-") {
-            bool isUnary = (i == 0) || 
-                          (i > 0 && (tokens[i-1] == "(" || 
-                           operations.find(tokens[i-1]) != operations.end()));
-            
-            if (isUnary) {
-                std::string unarMinus = "-_unar";
-                while (!stack.empty() && stack.back() != "(" && 
-                       priority(stack.back()) >= priority(unarMinus)) {
-                    result.push_back(stack.back());
-                    stack.pop_back();
-                }
-                stack.push_back(unarMinus);
-            } else {
-                while (!stack.empty() && stack.back() != "(" && 
-                       priority(stack.back()) >= priority(s)) {
-                    result.push_back(stack.back());
-                    stack.pop_back();
-                }
-                stack.push_back(s);
-            }
-        }
-        else if (operations.find(s) != operations.end()) {
+    std::vector<std::string> output;
+    std::stack<std::string> operators;
 
-            while (!stack.empty() && stack.back() != "(" && 
-                   priority(stack.back()) >= priority(s)) {
-                result.push_back(stack.back());
-                stack.pop_back();
+    for (const auto& token : tokens) {
+        try {
+            if (isDig(token[0])) {
+
+                size_t pos;
+                std::stof(token, &pos);
+                if (pos != token.length()) {
+                    throw std::invalid_argument("Невалидное число: " + token);
+                }
+                output.push_back(token);
+            } 
+            else if (token == "(") {
+                operators.push(token);
+            } 
+            else if (token == ")") {
+
+                bool foundOpen = false;
+                while (!operators.empty()) {
+                    std::string op = operators.top();
+                    operators.pop();
+                    if (op == "(") {
+                        foundOpen = true;
+                        break;
+                    }
+                    output.push_back(op);
+                }
+                if (!foundOpen) {
+                    throw std::invalid_argument("Беда со скобками");
+                }
+            } 
+            else if (isFunction(token)) {
+                while (!operators.empty() && operators.top() != "(" 
+                       && priority(operators.top()) >= priority(token)) {
+                    output.push_back(operators.top());
+                    operators.pop();
+                }
+                operators.push(token);
+            } 
+            else {
+                throw std::invalid_argument("Неизвестный токен: " + token);
             }
-            stack.push_back(s);
-        }
-        else {
-            throw std::invalid_argument("Чуждый калькулятору символ : " + s);
+        } catch (const std::exception& e) {
+            throw std::invalid_argument(std::string("Ошибка парсинга: ") + e.what());
         }
     }
-    
-    while (!stack.empty()) {
-        if (stack.back() != "(") { 
-            result.push_back(stack.back());
+
+    while (!operators.empty()) {
+        if (operators.top() == "(") {
+            throw std::invalid_argument("Не хватает закрывающей скобки");
         }
-        stack.pop_back();
+        output.push_back(operators.top());
+        operators.pop();
     }
 
-
-    return result;
+    return output;
 }
 
 float SentenceProcessor::calculate(std::string input) {
-
-    std::vector<float> nums;
-
     std::vector<std::string> postfix = _getPostfix(input);
+    
+    std::stack<float> values;
 
-    for (const std::string& s : _getPostfix(input)) {
+    try {
+        for (const std::string& token : postfix) {
+            try {
+                if (isDig(token[0])) {
 
+                    values.push(std::stof(token));
+                } 
+                else if (isFunction(token)) {
 
-        if (isDig(s.at(0))) {
-            nums.push_back(std::stof(s));
-        }
-        else {
-  
-            auto it = operations.find(s);
-            if (it != operations.end()) {
-                IOperation* operation = it->second.get();
-                size_t argCount = operation->getArgumentCount();
-                
+                    auto it = operations.find(token);
+                    if (it == operations.end()) {
+                        throw std::invalid_argument("Неизвестная операция: " + token);
+                    }
 
-                if (nums.size() < argCount) {
-                    
-                    throw std::invalid_argument("Недостаточно операндов: " + s);
+                    auto& operation = it->second;
+                    size_t argCount = operation->getArgumentCount();
 
+                    if (values.size() < argCount) {
+                        throw std::invalid_argument("Недостаточно аргументов для операции: " + token);
+                    }
+
+                    std::vector<float> args;
+                    for (size_t i = 0; i < argCount; i++) {
+                        args.push_back(values.top());
+                        values.pop();
+                    }
+                    std::reverse(args.begin(), args.end());
+
+                    float result;
+                    try {
+                        result = operation->execute(args);
+                    } catch (const std::domain_error& e) {
+                        throw std::domain_error(token + ": " + e.what());
+                    } catch (const std::exception& e) {
+                        throw std::runtime_error(token + " ошибка исполнения операции: " + e.what());
+                    }
+
+                    values.push(result);
+                } 
+                else {
+                    throw std::invalid_argument("Невалидный токен в начале выражения: " + token);
                 }
-                
-                std::vector<float> args;
-                for (size_t i = 0; i < argCount; ++i) {
-                    args.insert(args.begin(), nums.back());
-                    nums.pop_back();
-                }
-                
-                float result = operation->execute(args);
-                nums.push_back(result);
-            }
-            else {
-                throw std::invalid_argument("Неизвестная операция: " + s);
+            } catch (const std::exception& e) {
+                throw std::invalid_argument(std::string("Токен '") + token + "': " + e.what());
             }
         }
+
+        if (values.size() != 1) {
+            throw std::invalid_argument("Некорректное кол-во значений");
+        }
+
+        return values.top();
+    } 
+    catch (const std::exception& e) {
+        throw;
     }
 
-    if (nums.size() != 1) {
-        throw std::invalid_argument("Невалидное выражение");
-    }
-
-    return nums.at(0);
 }
