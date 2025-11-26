@@ -1,5 +1,5 @@
 #include <iostream>
-#include "SentenceProcessor.h"
+#include "core/headers/CalculatorModule.h"
 
 
 using namespace std;
@@ -17,7 +17,7 @@ int main() {
     string s;
     
 
-    SentenceProcessor sp;
+    CalculatorModule clac;
     
     while (true) {
         cout << "Введите выражение:" << endl;
@@ -28,7 +28,7 @@ int main() {
         }
         
         try {
-            float res = sp.calculate(s);
+            float res = clac.calculate(s);
             cout << "Ответ: " << res << endl;
         } catch (const exception& e) {
             cout << "Ошибка: " << e.what() << endl;

@@ -1,5 +1,5 @@
 #include <cmath>
-#include "../Interfaces/PluginInterface.h"
+#include "PluginInterface.h"
 
 class SinOeration : public IOperation {
 public:
