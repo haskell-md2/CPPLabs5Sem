@@ -48,18 +48,18 @@ private:
 
 public:
 
+    PluginManager();
+    explicit PluginManager(const std::string& pluginsDirectory);
+    
     PluginManager(const PluginManager&) = delete;
     PluginManager& operator=(const PluginManager&) = delete;
     
-    PluginManager(PluginManager&& other);
-    PluginManager& operator=(PluginManager&& other) ;
-
-    PluginManager();
-    explicit PluginManager(const std::string& pluginsDirectory);
-    ~PluginManager();
+    PluginManager(PluginManager&& other) noexcept;
+    PluginManager& operator=(PluginManager&& other) noexcept;
     
-    std::vector<std::shared_ptr<IOperation>> loadOperations();
+    ~PluginManager() noexcept; 
     
     void setPluginsDirectory(const std::string& directory);
     std::string getPluginsDirectory() const;
+    std::vector<std::shared_ptr<IOperation>> loadOperations();
 };

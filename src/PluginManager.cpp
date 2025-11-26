@@ -1,10 +1,24 @@
 #include "PluginManager.h"
 #include <iostream>
 
+
 PluginManager::PluginManager() = default;
 
-PluginManager::PluginManager(const std::string& pluginsDirectory) 
+PluginManager::PluginManager(const std::string& pluginsDirectory)
     : pluginsDir(pluginsDirectory) {}
+
+PluginManager::PluginManager(PluginManager&& other) noexcept
+    : loadedHandles(std::move(other.loadedHandles)),
+      pluginsDir(std::move(other.pluginsDir)) {}
+
+PluginManager& PluginManager::operator=(PluginManager&& other) noexcept {
+    if (this != &other) {
+        closeAllPlugins();
+        loadedHandles = std::move(other.loadedHandles);
+        pluginsDir = std::move(other.pluginsDir);
+    }
+    return *this;
+}
 
 PluginManager::~PluginManager() {
     closeAllPlugins();
