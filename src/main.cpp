@@ -2,9 +2,6 @@
 #include "core/headers/CalculatorModule.h"
 
 
-using namespace std;
-
-
 int main() {
     
     if (std::setlocale(LC_ALL, "ru_RU.UTF-8") == nullptr &&
@@ -14,14 +11,14 @@ int main() {
         std::cout << "Failed to set Russian locale. Enjoy the abracadabra! AZAZA!!1!" << std::endl;
     }
 
-    string s;
+    std::string s;
     
 
     CalculatorModule clac;
     
     while (true) {
-        cout << "Введите выражение:" << endl;
-        getline(cin, s);
+        std::cout << "Введите выражение:" << std::endl;
+        getline(std::cin, s);
         
         if (s == "exit" || s == "quit") {
             break;
@@ -29,9 +26,9 @@ int main() {
         
         try {
             float res = clac.calculate(s);
-            cout << "Ответ: " << res << endl;
-        } catch (const exception& e) {
-            cout << "Ошибка: " << e.what() << endl;
+            std::cout << "Ответ: " << res << std::endl;
+        } catch (const std::exception& e) {
+            std::cout << "Ошибка: " << e.what() << std::endl;
         }
     }
 
