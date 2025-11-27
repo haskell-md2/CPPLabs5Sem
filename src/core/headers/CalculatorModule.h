@@ -43,4 +43,8 @@ public:
     
     void registerOperation(std::shared_ptr<IOperation> operation);
     float calculate(std::string input);
+
+    RawDataProcessor getRawDataProcessor(){return _rdp;}
+    Tokenezator getTokenezator(){return _tr;}
+    std::unordered_map<std::string, std::shared_ptr<IOperation>> getOperations(){return operations;}
 };
