@@ -4,12 +4,12 @@
 
 int main() {
     
-    if (std::setlocale(LC_ALL, "ru_RU.UTF-8") == nullptr &&
-        std::setlocale(LC_ALL, "ru_RU.utf8") == nullptr &&
-        std::setlocale(LC_ALL, "Russian_Russia.1251") == nullptr &&
-        std::setlocale(LC_ALL, "rus") == nullptr) {
-        std::cout << "Failed to set Russian locale. Enjoy the abracadabra! AZAZA!!1!" << std::endl;
-    }
+    // if (std::setlocale(LC_ALL, "ru_RU.UTF-8") == nullptr &&
+    //     std::setlocale(LC_ALL, "ru_RU.utf8") == nullptr &&
+    //     std::setlocale(LC_ALL, "Russian_Russia.1251") == nullptr &&
+    //     std::setlocale(LC_ALL, "rus") == nullptr) {
+    //     std::cout << "Failed to set Russian locale. Enjoy the abracadabra! AZAZA!!1!" << std::endl;
+    // }
 
     std::string s;
     
